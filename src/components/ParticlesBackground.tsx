@@ -93,7 +93,7 @@ const ParticlesBackground: React.FC = () => {
         // Draw particle
         ctx.beginPath();
         ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(59, 130, 246, ${particle.opacity})`;
+        ctx.fillStyle = `rgba(153, 102, 255, ${particle.opacity})`;
         ctx.fill();
 
         // Connect particles that are close to each other
@@ -105,7 +105,7 @@ const ParticlesBackground: React.FC = () => {
 
           if (distance < 100) {
             ctx.beginPath();
-            ctx.strokeStyle = `rgba(59, 130, 246, ${0.05 * (1 - distance / 100)})`;
+            ctx.strokeStyle = `rgba(153, 102, 255, ${0.05 * (1 - distance / 100)})`;
             ctx.lineWidth = 0.5;
             ctx.moveTo(particle.x, particle.y);
             ctx.lineTo(otherParticle.x, otherParticle.y);
