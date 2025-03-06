@@ -48,7 +48,7 @@ const Navbar: React.FC = () => {
             <PhoneCall className="mr-1 h-4 w-4" />
             <span>Contact</span>
           </Link>
-          <Link to="#" className={`px-2 py-1 hover:text-primary transition-colors flex items-center ${isActive('/about')}`}>
+          <Link to="/about" className={`px-2 py-1 hover:text-primary transition-colors flex items-center ${isActive('/about')}`}>
             <Info className="mr-1 h-4 w-4" />
             <span>About</span>
           </Link>
