@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import AirQualityCard from './AirQualityCard';
 import PollutantsCard from './PollutantsCard';
@@ -26,13 +25,11 @@ const Dashboard: React.FC = () => {
   const [historicalData, setHistoricalData] = useState<AirQualityData[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Simulate data loading
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 500));
       
       setCurrentAirQuality(getCurrentAirQuality());
       setCurrentWeather(getCurrentWeather());
@@ -44,32 +41,27 @@ const Dashboard: React.FC = () => {
     
     fetchData();
     
-    // Set up interval to refresh data
     const interval = setInterval(() => {
       setCurrentAirQuality(getCurrentAirQuality());
       setCurrentWeather(getCurrentWeather());
-    }, 60000); // Refresh every minute
+    }, 10000);
     
     return () => clearInterval(interval);
   }, []);
 
-  // Handle time range changes for the chart
   useEffect(() => {
     setLoading(true);
     
-    // Simulate API delay
     setTimeout(() => {
       setHistoricalData(generateHistoricalData(timeRange));
       setLoading(false);
     }, 500);
   }, [timeRange]);
 
-  // Handle location changes
   const handleLocationChange = (location: LocationData) => {
     setCurrentLocation(location);
     setLoading(true);
     
-    // Simulate API delay
     setTimeout(() => {
       setCurrentAirQuality(getCurrentAirQuality());
       setCurrentWeather(getCurrentWeather());
@@ -81,6 +73,19 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-6 relative z-10">
+      <div className="mb-2 flex items-center justify-center">
+        <h1 className="text-2xl md:text-3xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-r from-purple-600 via-blue-500 to-purple-600">
+          Real-Time Air Quality Monitor
+        </h1>
+      </div>
+      
+      <div className="flex items-center justify-center mb-4">
+        <div className="px-3 py-1 bg-white/80 backdrop-blur-sm rounded-full text-sm font-medium text-gray-800 shadow-sm">
+          Data updates every 10 seconds
+          <span className="ml-2 inline-block w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+        </div>
+      </div>
+
       <LocationSelector 
         locations={locations}
         currentLocation={currentLocation}

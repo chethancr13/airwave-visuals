@@ -16,7 +16,7 @@ const Index = () => {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-50 to-purple-50">
       <ParticlesBackground />
       <WaveBackground />
       <Navbar />
@@ -25,7 +25,7 @@ const Index = () => {
       </main>
       <footer className="relative z-10 py-4 text-center text-sm text-gray-500 bg-white/60 backdrop-blur-md mt-10">
         <div className="container mx-auto">
-          <p>AirVision Dashboard &copy; {new Date().getFullYear()} | Real-time Air Quality Monitoring</p>
+          <p>Real-Time AQI Monitor &copy; {new Date().getFullYear()} | Live Air Quality Data</p>
         </div>
       </footer>
     </div>

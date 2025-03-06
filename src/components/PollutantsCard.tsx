@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AirQualityData } from '@/types';
 import { getPollutantName } from '@/utils/airQualityUtils';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 interface PollutantsCardProps {
   data: AirQualityData;
@@ -24,8 +24,22 @@ const PollutantsCard: React.FC<PollutantsCardProps> = ({ data }) => {
   // Convert data for chart
   const chartData = pollutantList.map(pollutant => ({
     name: getPollutantName(pollutant.id).split(' ')[0], // Just get first part of the name to keep it short
-    value: pollutant.value
+    value: pollutant.value,
+    id: pollutant.id
   }));
+
+  // Define colors for each pollutant
+  const getBarColor = (id: string) => {
+    switch(id) {
+      case 'pm25': return '#FF5252';
+      case 'pm10': return '#FF7B52';
+      case 'o3': return '#9C27B0';
+      case 'no2': return '#3F51B5';
+      case 'so2': return '#FFC107';
+      case 'co': return '#4CAF50';
+      default: return '#9966FF';
+    }
+  };
 
   return (
     <Card className="shadow-sm transition-all duration-300 hover:shadow-md animate-fade-in">
@@ -45,7 +59,7 @@ const PollutantsCard: React.FC<PollutantsCardProps> = ({ data }) => {
         </div>
         
         {/* Pollutants Bar Chart */}
-        <div className="pollutant-chart mt-4">
+        <div className="pollutant-chart mt-4 h-[180px]">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={chartData}
@@ -64,10 +78,13 @@ const PollutantsCard: React.FC<PollutantsCardProps> = ({ data }) => {
               />
               <Bar 
                 dataKey="value" 
-                fill="#9966FF" 
                 radius={[4, 4, 0, 0]}
                 animationDuration={1500}
-              />
+              >
+                {chartData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={getBarColor(entry.id)} />
+                ))}
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>
