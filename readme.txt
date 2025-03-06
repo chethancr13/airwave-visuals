@@ -127,3 +127,7 @@ Policy Advocacy: Advocate for global policies to reduce air pollution.
 
 Example:
 A global AQI monitoring network that shares data and insights with governments and NGOs.
+
+https://github.com/chethancr13/airwave-visuals/blob/a2506cf4edadf57b481866aa894d3643f7809070/Screenshot%202025-03-06%20232013.png
+
+
