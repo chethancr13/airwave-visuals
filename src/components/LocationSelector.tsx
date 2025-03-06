@@ -38,7 +38,7 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
         defaultValue={currentLocation.name}
         onValueChange={handleLocationChange}
       >
-        <SelectTrigger className="w-[180px] border-none shadow-none focus:ring-0 pl-0">
+        <SelectTrigger className="w-[220px] border-none shadow-none focus:ring-0 pl-0">
           <SelectValue placeholder="Select location" />
         </SelectTrigger>
         <SelectContent>
