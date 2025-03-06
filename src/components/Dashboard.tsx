@@ -5,6 +5,8 @@ import WeatherCard from './WeatherCard';
 import AirQualityChart from './AirQualityChart';
 import ForecastCard from './ForecastCard';
 import LocationSelector from './LocationSelector';
+import AqiAlertSystem from './AqiAlertSystem';
+import AqiInsights from './AqiInsights';
 import { AirQualityData, WeatherData, ForecastData, LocationData, TimeRange } from '@/types';
 import { 
   getCurrentAirQuality, 
@@ -73,6 +75,8 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-6 relative z-10">
+      <AqiAlertSystem data={currentAirQuality} />
+      
       <div className="mb-2 flex items-center justify-center">
         <h1 className="text-2xl md:text-3xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-r from-purple-600 via-blue-500 to-purple-600">
           Real-Time Air Quality Monitor
@@ -124,6 +128,7 @@ const Dashboard: React.FC = () => {
           />
           <PollutantsCard data={currentAirQuality} />
           <ForecastCard data={forecast} />
+          <AqiInsights />
         </div>
       )}
     </div>
