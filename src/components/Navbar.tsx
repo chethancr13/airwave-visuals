@@ -25,7 +25,7 @@ const Navbar: React.FC = () => {
         <div className="flex items-center space-x-2">
           <Link to="/" className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-primary rounded-md flex items-center justify-center text-white">
-              <AlertCircle size={18} />
+              <Map size={18} />
             </div>
             <span className="text-xl font-bold">Code Crew</span>
           </Link>

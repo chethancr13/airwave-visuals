@@ -1,394 +1,239 @@
-
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, 
-  ResponsiveContainer, LineChart, Line, BarChart, Bar, Legend
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  Legend, 
+  ResponsiveContainer,
+  LineChart,
+  Line
 } from 'recharts';
-import { Clock, Calendar, FileClock, Filter } from 'lucide-react';
+import { Calendar } from "@/components/ui/calendar";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-// Simulated historical data
-const dailyData = Array.from({ length: 24 }, (_, i) => ({
-  hour: `${i}:00`,
-  aqi: Math.floor(Math.random() * 50) + 50,
-  pm25: Math.floor(Math.random() * 30) + 10,
-  pm10: Math.floor(Math.random() * 40) + 20,
-  timestamp: new Date(new Date().setHours(i, 0, 0, 0)).toISOString(),
-}));
+// Sample data - in a real app, this would come from an API
+const generateHistoricalData = (days = 30) => {
+  const data = [];
+  const today = new Date();
+  
+  for (let i = days; i >= 0; i--) {
+    const date = new Date();
+    date.setDate(today.getDate() - i);
+    
+    data.push({
+      date: date.toISOString().split('T')[0],
+      aqi: Math.floor(Math.random() * 150) + 20,
+      pm25: Math.floor(Math.random() * 100) + 10,
+      pm10: Math.floor(Math.random() * 120) + 15,
+      o3: Math.floor(Math.random() * 80) + 5,
+      no2: Math.floor(Math.random() * 60) + 10,
+    });
+  }
+  
+  return data;
+};
 
-const weeklyData = Array.from({ length: 7 }, (_, i) => {
-  const date = new Date();
-  date.setDate(date.getDate() - 6 + i);
-  return {
-    day: date.toLocaleDateString('en-US', { weekday: 'short' }),
-    date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-    aqi: Math.floor(Math.random() * 70) + 40,
-    pm25: Math.floor(Math.random() * 40) + 15,
-    pm10: Math.floor(Math.random() * 50) + 25,
-    timestamp: date.toISOString(),
+const History = () => {
+  const [date, setDate] = useState<Date | undefined>(new Date());
+  const [period, setPeriod] = useState("30days");
+  const [data, setData] = useState(generateHistoricalData());
+  const [pollutant, setPollutant] = useState("aqi");
+  
+  useEffect(() => {
+    // In a real app, this would fetch data based on the selected period
+    const days = period === "7days" ? 7 : period === "30days" ? 30 : 90;
+    setData(generateHistoricalData(days));
+  }, [period]);
+  
+  const getColorForValue = (value: number) => {
+    if (value <= 50) return "#4CAF50"; // Good
+    if (value <= 100) return "#FFC107"; // Moderate
+    if (value <= 150) return "#FF9800"; // Unhealthy for sensitive groups
+    if (value <= 200) return "#F44336"; // Unhealthy
+    if (value <= 300) return "#9C27B0"; // Very unhealthy
+    return "#7D1128"; // Hazardous
   };
-});
-
-const monthlyData = Array.from({ length: 30 }, (_, i) => {
-  const date = new Date();
-  date.setDate(date.getDate() - 29 + i);
-  return {
-    day: date.getDate(),
-    date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-    aqi: Math.floor(Math.random() * 80) + 30,
-    pm25: Math.floor(Math.random() * 50) + 10,
-    pm10: Math.floor(Math.random() * 60) + 20,
-    timestamp: date.toISOString(),
-  };
-});
-
-// Simulated health data correlated with AQI
-const healthImpactData = weeklyData.map(item => ({
-  ...item,
-  asthmaReports: Math.floor(item.aqi / 10) + Math.floor(Math.random() * 5),
-  hospitalVisits: Math.floor(item.aqi / 20) + Math.floor(Math.random() * 3),
-}));
-
-// Correlation with weather factors
-const correlationData = [
-  { factor: 'Temperature', correlation: 0.65 },
-  { factor: 'Humidity', correlation: 0.72 },
-  { factor: 'Wind Speed', correlation: -0.58 },
-  { factor: 'Rainfall', correlation: -0.81 },
-  { factor: 'Traffic Density', correlation: 0.89 },
-  { factor: 'Industrial Activity', correlation: 0.76 }
-];
-
-const History: React.FC = () => {
+  
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50">
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-50 to-purple-50">
       <Navbar />
-      <main className="container mx-auto px-4 py-8">
-        <div className="space-y-6">
-          <div className="text-center space-y-2">
-            <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-600 via-blue-500 to-purple-600">
-              Historical AQI Data for Bangalore
-            </h1>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              Track air quality trends over time and analyze patterns to better understand local pollution factors
-            </p>
-          </div>
+      <main className="flex-grow container mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">Historical Air Quality Data</h1>
+          <p className="text-gray-600">View and analyze past air quality measurements</p>
+        </div>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          <Card>
+            <CardHeader>
+              <CardTitle>Time Period</CardTitle>
+              <CardDescription>Select the time range for data</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Select value={period} onValueChange={setPeriod}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select period" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="7days">Last 7 Days</SelectItem>
+                  <SelectItem value="30days">Last 30 Days</SelectItem>
+                  <SelectItem value="90days">Last 90 Days</SelectItem>
+                </SelectContent>
+              </Select>
+            </CardContent>
+          </Card>
           
-          <Tabs defaultValue="daily" className="w-full">
-            <div className="flex justify-between items-center mb-4">
-              <TabsList>
-                <TabsTrigger value="daily" className="flex items-center gap-1">
-                  <Clock size={14} />
-                  <span>24 Hours</span>
-                </TabsTrigger>
-                <TabsTrigger value="weekly" className="flex items-center gap-1">
-                  <Calendar size={14} />
-                  <span>7 Days</span>
-                </TabsTrigger>
-                <TabsTrigger value="monthly" className="flex items-center gap-1">
-                  <FileClock size={14} />
-                  <span>30 Days</span>
-                </TabsTrigger>
-                <TabsTrigger value="analysis" className="flex items-center gap-1">
-                  <Filter size={14} />
-                  <span>Analysis</span>
-                </TabsTrigger>
-              </TabsList>
-              <div className="text-sm text-gray-500">Last updated: {new Date().toLocaleString()}</div>
+          <Card>
+            <CardHeader>
+              <CardTitle>Pollutant</CardTitle>
+              <CardDescription>Select pollutant to display</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Select value={pollutant} onValueChange={setPollutant}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select pollutant" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="aqi">Air Quality Index (AQI)</SelectItem>
+                  <SelectItem value="pm25">PM2.5</SelectItem>
+                  <SelectItem value="pm10">PM10</SelectItem>
+                  <SelectItem value="o3">Ozone (O₃)</SelectItem>
+                  <SelectItem value="no2">Nitrogen Dioxide (NO₂)</SelectItem>
+                </SelectContent>
+              </Select>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader>
+              <CardTitle>Calendar</CardTitle>
+              <CardDescription>Select a specific date</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Calendar
+                mode="single"
+                selected={date}
+                onSelect={setDate}
+                className="rounded-md border"
+              />
+            </CardContent>
+          </Card>
+        </div>
+        
+        <Tabs defaultValue="bar" className="w-full">
+          <TabsList className="grid w-full max-w-md grid-cols-2 mb-8">
+            <TabsTrigger value="bar">Bar Chart</TabsTrigger>
+            <TabsTrigger value="line">Line Chart</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="bar" className="bg-white p-6 rounded-lg shadow-sm">
+            <h2 className="text-xl font-semibold mb-4">
+              {pollutant.toUpperCase()} Levels - {period === "7days" ? "Last 7 Days" : period === "30days" ? "Last 30 Days" : "Last 90 Days"}
+            </h2>
+            <div className="h-[400px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={data}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis 
+                    dataKey="date" 
+                    angle={-45} 
+                    textAnchor="end"
+                    tick={{ fontSize: 12 }}
+                    height={60}
+                  />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Bar 
+                    dataKey={pollutant} 
+                    name={pollutant.toUpperCase()} 
+                    fill="#8884d8"
+                  />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
-            
-            <TabsContent value="daily" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>24-Hour AQI Trend</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-[400px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={dailyData} margin={{ top: 10, right: 30, left: 0, bottom: 10 }}>
-                        <defs>
-                          <linearGradient id="aqiGradient" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8}/>
-                            <stop offset="95%" stopColor="#8884d8" stopOpacity={0}/>
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="hour" />
-                        <YAxis />
-                        <Tooltip 
-                          formatter={(value: number, name: string) => [value, name === 'aqi' ? 'AQI' : name]}
-                          labelFormatter={(label) => `Time: ${label}`}
-                        />
-                        <Area 
-                          type="monotone" 
-                          dataKey="aqi" 
-                          stroke="#8884d8" 
-                          fillOpacity={1} 
-                          fill="url(#aqiGradient)" 
-                        />
-                      </AreaChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>PM2.5 Levels (24h)</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="h-[250px]">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={dailyData} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="hour" />
-                          <YAxis />
-                          <Tooltip />
-                          <Line type="monotone" dataKey="pm25" stroke="#ff7300" activeDot={{ r: 8 }} />
-                        </LineChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardHeader>
-                    <CardTitle>PM10 Levels (24h)</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="h-[250px]">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={dailyData} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="hour" />
-                          <YAxis />
-                          <Tooltip />
-                          <Line type="monotone" dataKey="pm10" stroke="#82ca9d" activeDot={{ r: 8 }} />
-                        </LineChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="weekly" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>7-Day AQI Trend</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-[400px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={weeklyData} margin={{ top: 10, right: 30, left: 0, bottom: 10 }}>
-                        <defs>
-                          <linearGradient id="aqiGradientWeekly" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8}/>
-                            <stop offset="95%" stopColor="#8884d8" stopOpacity={0}/>
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="day" />
-                        <YAxis />
-                        <Tooltip 
-                          formatter={(value: number, name: string) => [value, name === 'aqi' ? 'AQI' : name]}
-                          labelFormatter={(label) => `Day: ${label}`}
-                        />
-                        <Area 
-                          type="monotone" 
-                          dataKey="aqi" 
-                          stroke="#8884d8" 
-                          fillOpacity={1} 
-                          fill="url(#aqiGradientWeekly)" 
-                        />
-                      </AreaChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader>
-                  <CardTitle>Particulate Matter Comparison (Weekly)</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-[300px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={weeklyData} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="day" />
-                        <YAxis />
-                        <Tooltip />
-                        <Legend />
-                        <Bar dataKey="pm25" name="PM2.5" fill="#8884d8" />
-                        <Bar dataKey="pm10" name="PM10" fill="#82ca9d" />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-            
-            <TabsContent value="monthly" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle>30-Day AQI Trend</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-[400px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={monthlyData} margin={{ top: 10, right: 30, left: 0, bottom: 10 }}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="date" />
-                        <YAxis />
-                        <Tooltip 
-                          formatter={(value: number, name: string) => [value, name === 'aqi' ? 'AQI' : name]}
-                          labelFormatter={(label) => `Date: ${label}`}
-                        />
-                        <Line 
-                          type="monotone" 
-                          dataKey="aqi" 
-                          stroke="#8884d8" 
-                          strokeWidth={2}
-                          dot={{ r: 0 }}
-                          activeDot={{ r: 8 }}
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Monthly PM2.5 Trend</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="h-[250px]">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={monthlyData} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="date" />
-                          <YAxis />
-                          <Tooltip />
-                          <Line type="monotone" dataKey="pm25" stroke="#ff7300" dot={false} />
-                        </LineChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Monthly PM10 Trend</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="h-[250px]">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={monthlyData} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="date" />
-                          <YAxis />
-                          <Tooltip />
-                          <Line type="monotone" dataKey="pm10" stroke="#82ca9d" dot={false} />
-                        </LineChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="analysis" className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Health Impact Correlation</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="h-[300px]">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={healthImpactData} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="day" />
-                          <YAxis yAxisId="left" orientation="left" stroke="#8884d8" />
-                          <YAxis yAxisId="right" orientation="right" stroke="#82ca9d" />
-                          <Tooltip />
-                          <Legend />
-                          <Line yAxisId="left" type="monotone" dataKey="aqi" name="AQI" stroke="#8884d8" />
-                          <Line yAxisId="right" type="monotone" dataKey="asthmaReports" name="Asthma Reports" stroke="#82ca9d" />
-                          <Line yAxisId="right" type="monotone" dataKey="hospitalVisits" name="Hospital Visits" stroke="#ff7300" />
-                        </LineChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardHeader>
-                    <CardTitle>AQI Correlation Factors</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="h-[300px]">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart
-                          layout="vertical"
-                          data={correlationData}
-                          margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                        >
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis type="number" domain={[-1, 1]} />
-                          <YAxis dataKey="factor" type="category" />
-                          <Tooltip formatter={(value) => [`${(Number(value) * 100).toFixed(1)}%`, 'Correlation']} />
-                          <Bar 
-                            dataKey="correlation" 
-                            fill={(datum) => datum.correlation > 0 ? "#8884d8" : "#ff7300"}
-                          />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-              
-              <Card>
-                <CardHeader>
-                  <CardTitle>AI-Driven AQI Predictions & Insights</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
-                      <h3 className="font-medium mb-2">Key Findings</h3>
-                      <ul className="list-disc pl-5 space-y-1 text-sm">
-                        <li>Traffic congestion shows strongest correlation with AQI spikes (89%)</li>
-                        <li>Hospital visits for respiratory issues increase 23% when AQI exceeds 150</li>
-                        <li>AQI levels are typically lowest between 3-6 AM and highest between 5-8 PM</li>
-                        <li>Rainfall events consistently reduce AQI levels by 30-40% within 24 hours</li>
-                        <li>Weekend AQI levels are 18% lower than weekday levels on average</li>
-                      </ul>
-                    </div>
-                    
-                    <div className="p-4 bg-purple-50 rounded-lg border border-purple-100">
-                      <h3 className="font-medium mb-2">Personalized Recommendations</h3>
-                      <ul className="list-disc pl-5 space-y-1 text-sm">
-                        <li>For asthma patients: Schedule outdoor activities before 9 AM when AQI is lowest</li>
-                        <li>Use air purifiers during evening hours (5-9 PM) when pollution peaks</li>
-                        <li>Consider N95 masks when AQI exceeds 100 for sensitive individuals</li>
-                        <li>Monitor weather forecasts for rainfall, which improves air quality</li>
-                        <li>Plan longer outdoor activities for weekends when pollution levels are lower</li>
-                      </ul>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+          </TabsContent>
+          
+          <TabsContent value="line" className="bg-white p-6 rounded-lg shadow-sm">
+            <h2 className="text-xl font-semibold mb-4">
+              {pollutant.toUpperCase()} Trend - {period === "7days" ? "Last 7 Days" : period === "30days" ? "Last 30 Days" : "Last 90 Days"}
+            </h2>
+            <div className="h-[400px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart
+                  data={data}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis 
+                    dataKey="date" 
+                    angle={-45} 
+                    textAnchor="end"
+                    tick={{ fontSize: 12 }}
+                    height={60}
+                  />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Line 
+                    type="monotone" 
+                    dataKey={pollutant} 
+                    name={pollutant.toUpperCase()} 
+                    stroke="#8884d8" 
+                    activeDot={{ r: 8 }} 
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </TabsContent>
+        </Tabs>
+        
+        <div className="mt-8 bg-white p-6 rounded-lg shadow-sm">
+          <h2 className="text-xl font-semibold mb-4">Data Table</h2>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">AQI</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PM2.5</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PM10</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">O₃</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">NO₂</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {data.map((item, index) => (
+                  <tr key={index} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.date}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.aqi}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.pm25}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.pm10}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.o3}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.no2}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </main>
+      
+      <footer className="py-4 text-center text-sm text-gray-500 bg-white/60 backdrop-blur-md mt-10">
+        <div className="container mx-auto">
+          <p>Air Quality History Monitor &copy; {new Date().getFullYear()} | Historical Air Quality Data</p>
+        </div>
+      </footer>
     </div>
   );
 };
