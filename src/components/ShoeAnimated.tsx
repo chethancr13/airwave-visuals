@@ -1,6 +1,13 @@
 
 import React, { useEffect, useRef } from 'react';
 
+// Extend Window interface to include THREE
+declare global {
+  interface Window {
+    THREE: any;
+  }
+}
+
 interface ShoeAnimatedProps {
   modelSrc?: string;
   className?: string;
