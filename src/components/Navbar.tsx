@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   ShoppingBag, 
@@ -7,11 +7,13 @@ import {
   User,
   Heart, 
   ShoppingCart,
-  Menu
+  Menu,
+  X
 } from 'lucide-react';
 
 const Navbar: React.FC = () => {
   const location = useLocation();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   const isActive = (path: string) => {
     return location.pathname === path ? "text-primary font-semibold" : "text-gray-300";
@@ -58,11 +60,39 @@ const Navbar: React.FC = () => {
             <ShoppingCart className="h-5 w-5" />
             <span className="absolute -top-1 -right-1 bg-primary text-xs w-4 h-4 flex items-center justify-center rounded-full">3</span>
           </button>
-          <button className="md:hidden p-2 text-gray-300 hover:text-white transition-colors">
-            <Menu className="h-5 w-5" />
+          <button 
+            className="md:hidden p-2 text-gray-300 hover:text-white transition-colors"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
         </div>
       </div>
+      
+      {/* Mobile menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden bg-black/95 border-t border-gray-800 animate-fade-in">
+          <div className="container mx-auto px-4 py-4">
+            <nav className="flex flex-col space-y-4">
+              <Link to="/" className={`px-2 py-2 ${isActive('/')}`} onClick={() => setMobileMenuOpen(false)}>
+                HOME
+              </Link>
+              <Link to="/men" className={`px-2 py-2 ${isActive('/men')}`} onClick={() => setMobileMenuOpen(false)}>
+                MEN
+              </Link>
+              <Link to="/women" className={`px-2 py-2 ${isActive('/women')}`} onClick={() => setMobileMenuOpen(false)}>
+                WOMEN
+              </Link>
+              <Link to="/shoes" className={`px-2 py-2 ${isActive('/shoes')}`} onClick={() => setMobileMenuOpen(false)}>
+                SHOES
+              </Link>
+              <Link to="/collections" className={`px-2 py-2 ${isActive('/collections')}`} onClick={() => setMobileMenuOpen(false)}>
+                COLLECTIONS
+              </Link>
+            </nav>
+          </div>
+        </div>
+      )}
     </header>
   );
 };

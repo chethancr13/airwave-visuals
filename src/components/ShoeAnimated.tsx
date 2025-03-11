@@ -27,24 +27,24 @@ const ShoeAnimated: React.FC<ShoeAnimatedProps> = ({
       const height = container.clientHeight;
       
       // Set up scene
-      const scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x000000);
+      const scene = new window.THREE.Scene();
+      scene.background = new window.THREE.Color(0x000000);
       
       // Add ambient light
-      const ambientLight = new THREE.AmbientLight(0x404040, 2);
+      const ambientLight = new window.THREE.AmbientLight(0x404040, 2);
       scene.add(ambientLight);
       
       // Add directional light
-      const dirLight1 = new THREE.DirectionalLight(0xffffff, 3);
+      const dirLight1 = new window.THREE.DirectionalLight(0xffffff, 3);
       dirLight1.position.set(1, 1, 1);
       scene.add(dirLight1);
       
-      const dirLight2 = new THREE.DirectionalLight(0x8b5cf6, 3); // Purple light
+      const dirLight2 = new window.THREE.DirectionalLight(0x8b5cf6, 3); // Purple light
       dirLight2.position.set(-1, -1, -1);
       scene.add(dirLight2);
       
       // Add spotlight
-      const spotLight = new THREE.SpotLight(0xffffff, 5);
+      const spotLight = new window.THREE.SpotLight(0xffffff, 5);
       spotLight.position.set(0, 5, 0);
       spotLight.angle = Math.PI / 4;
       spotLight.penumbra = 0.1;
@@ -53,11 +53,11 @@ const ShoeAnimated: React.FC<ShoeAnimatedProps> = ({
       scene.add(spotLight);
       
       // Camera setup
-      const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
+      const camera = new window.THREE.PerspectiveCamera(45, width / height, 0.1, 100);
       camera.position.set(0, 0, 5);
       
       // Renderer
-      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      const renderer = new window.THREE.WebGLRenderer({ antialias: true });
       renderer.setSize(width, height);
       renderer.setPixelRatio(window.devicePixelRatio);
       renderer.shadowMap.enabled = true;
@@ -67,13 +67,13 @@ const ShoeAnimated: React.FC<ShoeAnimatedProps> = ({
       container.appendChild(renderer.domElement);
       
       // Add a placeholder sphere while model loads
-      const geometry = new THREE.SphereGeometry(1, 32, 32);
-      const material = new THREE.MeshStandardMaterial({ 
+      const geometry = new window.THREE.SphereGeometry(1, 32, 32);
+      const material = new window.THREE.MeshStandardMaterial({ 
         color: 0x8b5cf6, 
         metalness: 0.7,
         roughness: 0.3,
       });
-      const sphere = new THREE.Mesh(geometry, material);
+      const sphere = new window.THREE.Mesh(geometry, material);
       scene.add(sphere);
       
       // Rotate the scene
